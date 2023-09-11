@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
 
@@ -62,7 +63,7 @@ func addOrder(w http.ResponseWriter, r *http.Request) {
 	// 先去查看商品表还有没有库存
 	var goods Goods
 	tx := db.Begin()
-	if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&goods, 1).Error; err != nil {
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&goods, 1).Error; err != nil {
 		tx.Rollback()
 		panic(err)
 	}
